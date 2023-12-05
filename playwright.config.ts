@@ -1,8 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // to generate auth npx playwright codegen at-user-geb0763b1589.preview.gitpod-dev.com/workspaces --save-storage=.auth/preview_session.json
-process.env.GITPOD_HOST = 'at-user-geb0763b1589.preview.gitpod-dev.com';
-process.env.GITPOD_AUTH_SESSION = '.auth/preview_session.json';
+// process.env.GITPOD_HOST = 'at-user-geb0763b1589.preview.gitpod-dev.com';
+// process.env.GITPOD_AUTH_SESSION = '.auth/preview_session.json';
+
+process.env.GITPOD_HOST = 'hw-papi-ws-related.preview.gitpod-dev.com';
+process.env.GITPOD_AUTH_SESSION = '.auth/workspace_session.json';
+
 
 // process.env.GITPOD_HOST = 'gitpod.io';
 // process.env.GITPOD_AUTH_SESSION = '.auth/session.json';
