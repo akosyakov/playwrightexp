@@ -102,27 +102,38 @@ export const orgSettings = {
     goTo: (page: Page) => page.goto(`https://${process.env.GITPOD_HOST}/settings`),
     setWorkspaceShared: async (page: Page, shared: boolean) => {
         await page.getByLabel('Workspace SharingAllow').click();
-        expect(page.getByLabel('Workspace SharingAllow')).toBeChecked({ checked: shared  });
+        expect(page.getByLabel('Workspace SharingAllow')).toBeChecked({ checked: shared });
     },
     checkWorkspaceClass: async (page: Page, id: WorkspaceClass, checked: boolean) => {
-        expect(page.locator('#'+id)).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#' + id)).toBeVisible();
         const isChecked = await page.locator('#' + id).isChecked();
         if ((isChecked && checked) || (!isChecked && !checked)) {
             return;
         }
-        await page.locator("#" + id).click({ force: true });
+        if (checked) {
+            await page.locator('#' + id).check();
+        } else {
+            const allClsState = await Promise.all(AllWorkspaceClass.map(e => page.locator('#' + e).isChecked().then(d => ({ id: e, checked: d }))))
+            const allFalse = allClsState.filter(e => e.id !== id).every(e => !e.checked);
+            if (!allFalse) {
+                await page.locator('#' + id).uncheck();
+            } else {
+                await page.locator('#' + id).click();
+                await expect(page.getByText(/Should have one workspace class selected at least/)).toBeVisible()
+            }
+        }
     },
     setAllowedWorkspaceClasses: async (page: Page, classes: WorkspaceClass[]) => {
         await orgSettings.goTo(page);
-        
+
         await Promise.all(AllWorkspaceClass.filter(e => classes.includes(e)).map(e => orgSettings.checkWorkspaceClass(page, e, true)))
         await Promise.all(AllWorkspaceClass.filter(e => !classes.includes(e)).map((e, i) => orgSettings.checkWorkspaceClass(page, e, false)))
         if (classes.length === 0) {
-            expect(page.getByText(/Should have one workspace class selected at least/)).toBeVisible()
+            await expect(page.getByText(/Should have one workspace class selected at least/)).toBeVisible()
             return;
         }
         for (const id of AllWorkspaceClass) {
-            expect(page.locator('#' + id)).toBeChecked({ checked: classes.includes(id) });
+            await expect(page.locator('#' + id)).toBeChecked({ checked: classes.includes(id) });
         }
     }
 }
