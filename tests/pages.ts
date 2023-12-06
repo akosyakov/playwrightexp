@@ -1,5 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 
+type WorkspaceClass = 'g1-small' | 'g1-standard' | 'g1-large'
+const AllWorkspaceClass: WorkspaceClass[] = ["g1-small", "g1-standard", "g1-large"];
+
 export const workspaces = {
     goTo: async (page: Page) => {
         await page.goto(`https://${process.env.GITPOD_HOST}/workspaces`)
@@ -79,21 +82,74 @@ export const workspaces = {
 
 export const newWorkspace = {
     goTo: (page: Page, contextUrl = 'https://github.com/gitpod-io/empty') => page.goto(`https://${process.env.GITPOD_HOST}/new#${contextUrl}`),
-    continue: async (page: Page) => {
+    continue: async (page: Page, workspaceClass?: WorkspaceClass, errorMsg?: string) => {
+        if (workspaceClass) {
+            await workspaceClassDropDown.set(page, workspaceClass, true);
+        }
         await page.getByRole('button', { name: 'Continue' }).click();
+        if (errorMsg) {
+            await expect(page.getByText(errorMsg)).toBeVisible();
+            return
+        }
         await page.waitForURL(`https://${process.env.GITPOD_HOST}/start/**`);
+    },
+    Errors: {
+        ClassNotAllowed: 'workspace class is not allowed',
+    }
+}
+
+export const orgSettings = {
+    goTo: (page: Page) => page.goto(`https://${process.env.GITPOD_HOST}/settings`),
+    setWorkspaceShared: async (page: Page, shared: boolean) => {
+        await page.getByLabel('Workspace SharingAllow').click();
+        expect(page.getByLabel('Workspace SharingAllow')).toBeChecked({ checked: shared  });
+    },
+    checkWorkspaceClass: async (page: Page, id: WorkspaceClass, checked: boolean) => {
+        expect(page.locator('#'+id)).toBeVisible({ timeout: 10000 });
+        const isChecked = await page.locator('#' + id).isChecked();
+        if ((isChecked && checked) || (!isChecked && !checked)) {
+            return;
+        }
+        await page.locator("#" + id).click({ force: true });
+    },
+    setAllowedWorkspaceClasses: async (page: Page, classes: WorkspaceClass[]) => {
+        await orgSettings.goTo(page);
+        
+        await Promise.all(AllWorkspaceClass.filter(e => classes.includes(e)).map(e => orgSettings.checkWorkspaceClass(page, e, true)))
+        await Promise.all(AllWorkspaceClass.filter(e => !classes.includes(e)).map((e, i) => orgSettings.checkWorkspaceClass(page, e, false)))
+        if (classes.length === 0) {
+            expect(page.getByText(/Should have one workspace class selected at least/)).toBeVisible()
+            return;
+        }
+        for (const id of AllWorkspaceClass) {
+            expect(page.locator('#' + id)).toBeChecked({ checked: classes.includes(id) });
+        }
     }
 }
 
 export const workspaceClassDropDown = {
     get: (page: Page) => page.getByRole('button', { name: 'Class' }),
-    expect: async (page: Page, id: 'g1-standard' | 'g1-small') => {
-        return expect(workspaceClassDropDown.get(page).filter({ hasText: id === 'g1-small' ? 'Small' : 'Standard' })).toBeVisible()
+    expect: async (page: Page, id: WorkspaceClass) => {
+        let classTitle = id.replace('g1-', '');
+        classTitle = classTitle[0].toUpperCase() + classTitle.slice(1);
+        return expect(workspaceClassDropDown.get(page).filter({ hasText: classTitle })).toBeVisible()
     },
-    set: async (page: Page, id: 'g1-standard' | 'g1-small') => {
-        await workspaceClassDropDown.get(page).click();
+    set: async (page: Page, id: WorkspaceClass, dontCheck?: true) => {
+        await workspaceClassDropDown.showDropDown(page);
+        if (!dontCheck) {
+            expect(page.locator('#' + id)).not.toHaveClass(/cursor-not-allowed/)
+        }
         await page.locator('#' + id).click();
         await workspaceClassDropDown.expect(page, id);
+    },
+    unableToSet: async (page: Page, id: WorkspaceClass) => {
+        await workspaceClassDropDown.showDropDown(page);
+        expect(page.locator('#' + id)).toHaveClass(/cursor-not-allowed/)
+    },
+    showDropDown: async (page: Page) => {
+        if (!(await page.locator('#' + AllWorkspaceClass[0]).isVisible())) {
+            await workspaceClassDropDown.get(page).click();
+        }
     }
 }
 

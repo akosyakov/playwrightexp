@@ -21,7 +21,7 @@ test('actions', async ({ page }) => {
     await workspaces.goTo(page);
     await workspaces.expectPinned(page, true);
     await workspaces.expectShared(page, true);
-
+    
     await workspaces.setPinned(page, false);
     await workspaces.setShared(page, false);
     await workspaces.goTo(page);

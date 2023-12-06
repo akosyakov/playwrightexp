@@ -1,11 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// to generate auth npx playwright codegen at-user-geb0763b1589.preview.gitpod-dev.com/workspaces --save-storage=.auth/preview_session.json
+// to generate auth npx playwright codegen hw-org-cls.preview.gitpod-dev.com/workspaces --save-storage=.auth/class_session.json
 // process.env.GITPOD_HOST = 'at-user-geb0763b1589.preview.gitpod-dev.com';
 // process.env.GITPOD_AUTH_SESSION = '.auth/preview_session.json';
 
-process.env.GITPOD_HOST = 'hw-papi-ws-related.preview.gitpod-dev.com';
-process.env.GITPOD_AUTH_SESSION = '.auth/workspace_session.json';
+// process.env.GITPOD_HOST = 'hw-papi-ws-related.preview.gitpod-dev.com';
+// process.env.GITPOD_AUTH_SESSION = '.auth/workspace_session.json';
+
+process.env.GITPOD_HOST = 'hw-org-cls.preview.gitpod-dev.com';
+process.env.GITPOD_AUTH_SESSION = '.auth/class_session.json';
 
 
 // process.env.GITPOD_HOST = 'gitpod.io';
@@ -26,6 +29,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  timeout: 120000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
