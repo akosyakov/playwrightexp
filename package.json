@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "gen-session": "node scripts/session-gen.js",
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
