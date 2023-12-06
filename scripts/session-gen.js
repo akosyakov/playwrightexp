@@ -1,11 +1,15 @@
 require('dotenv').config();
-const { writeFileSync } = require('node:fs');
+const { writeFileSync, existsSync } = require('node:fs');
 const { spawn } = require('node:child_process');
+const { join } = require('node:path');
 
 const { GITPOD_HOST, GITPOD_AUTH_SESSION } = process.env;
 
 if (!GITPOD_HOST || !GITPOD_AUTH_SESSION) {
-    writeFileSync(__dirname + '/../.env', `GITPOD_HOST=gitpod.io\nGITPOD_AUTH_SESSION=.auth/io_session.json\n`);
+    const envPath = join(__dirname, '../.env');
+    if (!existsSync(envPath)) {
+        writeFileSync(__dirname + '/../.env', `GITPOD_HOST=gitpod.io\nGITPOD_AUTH_SESSION=.auth/io_session.json\n`);
+    }
     throw new Error('GITPOD_HOST and GITPOD_AUTH_SESSION must be set. Check your .env file');
 }
 
