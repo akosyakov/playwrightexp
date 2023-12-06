@@ -1,8 +1,8 @@
-import { test, expect, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export const workspaces = {
     goTo: async (page: Page) => {
-        await page.goto(`https://${process.env.GITPOD_HOST}/workspaces`)
+        await page.goto(`https://${process.env.GITPOD_HOST}/workspaces`);
         await page.waitForSelector('button');
         await expect(page.getByRole('button', { name: 'New Workspace' })).toBeVisible();
     },
@@ -15,9 +15,11 @@ export const workspaces = {
     },
     delete: async (page: Page, index: number) => {
         await page.getByRole('img', { name: 'Actions' }).nth(index).click();
-        await page.getByText('Delete', {
-            exact: true
-        }).click();
+        await page
+            .getByText('Delete', {
+                exact: true,
+            })
+            .click();
         await page.getByRole('button', { name: 'Delete Workspace' }).click();
         await expect(page.getByText('Your workspace was deleted').last()).toBeVisible();
     },
@@ -75,61 +77,61 @@ export const workspaces = {
         }
         await page.getByText('Share').click();
         await workspaces.expectShared(page, shared);
-    }
-}
+    },
+};
 
 export const newWorkspace = {
     goTo: (page: Page, contextUrl = 'https://github.com/gitpod-io/empty') => page.goto(`https://${process.env.GITPOD_HOST}/new#${contextUrl}`),
     continue: async (page: Page) => {
         await page.getByRole('button', { name: 'Continue' }).click();
         await page.waitForURL(`https://${process.env.GITPOD_HOST}/start/**`);
-    }
-}
+    },
+};
 
 export const workspaceClassDropDown = {
     get: (page: Page) => page.getByRole('button', { name: 'Class' }),
     expect: async (page: Page, id: 'g1-standard' | 'g1-small') => {
-        return expect(workspaceClassDropDown.get(page).filter({ hasText: id === 'g1-small' ? 'Small' : 'Standard' })).toBeVisible()
+        return expect(workspaceClassDropDown.get(page).filter({ hasText: id === 'g1-small' ? 'Small' : 'Standard' })).toBeVisible();
     },
     set: async (page: Page, id: 'g1-standard' | 'g1-small') => {
         await workspaceClassDropDown.get(page).click();
         await page.locator('#' + id).click();
         await workspaceClassDropDown.expect(page, id);
-    }
-}
+    },
+};
 
 export const editorDropDown = {
     get: (page: Page) => page.getByRole('button', { name: 'editor' }),
     expect: async (page: Page, editor: 'code' | 'xterm', latest = false) => {
-        let locator = editorDropDown.get(page).filter({ hasText: editor === 'code' ? 'VS Code' : 'Terminal' }).filter({ hasText: 'Browser' });
+        let locator = editorDropDown
+            .get(page)
+            .filter({ hasText: editor === 'code' ? 'VS Code' : 'Terminal' })
+            .filter({ hasText: 'Browser' });
         if (latest) {
             locator = locator.filter({ hasText: 'Latest' });
         }
-        return expect(locator).toBeVisible()
-    }
-    ,
+        return expect(locator).toBeVisible();
+    },
     set: async (page: Page, editor: 'code' | 'xterm', latest = false) => {
         await editorDropDown.get(page).click();
         await page.locator('#' + editor + (latest ? '-latest' : '')).click();
         await editorDropDown.expect(page, editor, latest);
-    }
-}
+    },
+};
 
 export const latestEditor = {
     get: (page: Page) => page.getByLabel('Latest Release'),
-    expect: (page: Page, latest: boolean) =>
-        expect(latestEditor.get(page)).toBeChecked({ checked: latest })
-    ,
+    expect: (page: Page, latest: boolean) => expect(latestEditor.get(page)).toBeChecked({ checked: latest }),
     set: async (page: Page, value: boolean) => {
         const currentValue = await latestEditor.get(page).isChecked();
         if (currentValue === value) {
             return;
         }
         await latestEditor.get(page).click({
-            force: true
+            force: true,
         });
-    }
-}
+    },
+};
 
 export const dotfiles = {
     get: (page: Page) => page.getByPlaceholder('dotfiles'),
@@ -143,8 +145,8 @@ export const dotfiles = {
         await expect(dotfiles.get(page)).toHaveValue(value);
         await page.getByRole('button', { name: 'Save' }).nth(0).click();
         await expect(page.getByText('Your dotfiles repository was')).toBeVisible();
-    }
-}
+    },
+};
 
 export const workspaceTimeout = {
     get: (page: Page) => page.getByPlaceholder('e.g. 30m'),
@@ -158,16 +160,16 @@ export const workspaceTimeout = {
         await expect(workspaceTimeout.get(page)).toHaveValue(value);
         await page.getByRole('button', { name: 'Save' }).nth(1).click();
         await expect(page.getByText('Default workspace timeout was')).toBeVisible();
-    }
-}
+    },
+};
 
 export const userPreferences = {
     goTo: (page: Page) => page.goto(`https://${process.env.GITPOD_HOST}/user/preferences`),
     resetOptions: async (page: Page) => {
         await page.getByRole('button', { name: 'Reset Options' }).click();
         await expect(page.getByText('Workspace options have been')).toBeVisible();
-    }
-}
+    },
+};
 
 export const setup = async (page: Page) => {
     await userPreferences.goTo(page);
@@ -178,4 +180,4 @@ export const setup = async (page: Page) => {
     await workspaceTimeout.set(page, '');
     await workspaces.goTo(page);
     await workspaces.deleteAll(page);
-}
+};
