@@ -3,6 +3,7 @@ import { test, expect, Page } from '@playwright/test';
 export const workspaces = {
     goTo: async (page: Page) => {
         await page.goto(`https://${process.env.GITPOD_HOST}/workspaces`)
+        await page.waitForSelector('button');
         await expect(page.getByRole('button', { name: 'New Workspace' })).toBeVisible();
     },
     deleteAll: async (page: Page) => {
@@ -146,7 +147,7 @@ export const dotfiles = {
 }
 
 export const workspaceTimeout = {
-    get: (page: Page) => page.getByPlaceholder('30m'),
+    get: (page: Page) => page.getByPlaceholder('e.g. 30m'),
     expect: (page: Page, value: string) => expect(workspaceTimeout.get(page)).toHaveValue(value),
     set: async (page: Page, value: string) => {
         const currentValue = await workspaceTimeout.get(page).inputValue();
