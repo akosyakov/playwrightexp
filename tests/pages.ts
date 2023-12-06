@@ -125,9 +125,14 @@ export const orgSettings = {
     },
     setAllowedWorkspaceClasses: async (page: Page, classes: WorkspaceClass[]) => {
         await orgSettings.goTo(page);
-
-        await Promise.all(AllWorkspaceClass.filter(e => classes.includes(e)).map(e => orgSettings.checkWorkspaceClass(page, e, true)))
-        await Promise.all(AllWorkspaceClass.filter(e => !classes.includes(e)).map((e, i) => orgSettings.checkWorkspaceClass(page, e, false)))
+        const arr1 = AllWorkspaceClass.filter(e => classes.includes(e))
+        for (const e of arr1) {
+            await orgSettings.checkWorkspaceClass(page, e, true)
+        }
+        const arr2 = AllWorkspaceClass.filter(e => !classes.includes(e))
+        for (const e of arr2) {
+            await orgSettings.checkWorkspaceClass(page, e, false)   
+        }
         if (classes.length === 0) {
             await expect(page.getByText(/Should have one workspace class selected at least/)).toBeVisible()
             return;
