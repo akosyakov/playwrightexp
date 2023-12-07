@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "ms-playwright.playwright",
+        "hbenl.vscode-test-explorer",
+        "hbenl.test-adapter-converter"
+    ]
+}

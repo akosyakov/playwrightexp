@@ -1,10 +1,6 @@
 import { test } from '@playwright/test';
 
-import {
-    newWorkspace, workspaces,
-    setup,
-    workspaceClassDropDown
-} from "./pages";
+import { newWorkspace, workspaces, setup, workspaceClassDropDown } from './pages';
 
 test.beforeEach(({ page }) => setup(page));
 
