@@ -22,3 +22,5 @@ Allow us to write e2e tests for dashboard components. Get more information from:
         ```
 
 Then we are happy with Test Explorer on VS Code UX or terminal `yarn test`
+
+Available environment variables are listed in `config.ts`

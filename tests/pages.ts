@@ -1,8 +1,9 @@
 import { expect, Page } from '@playwright/test';
+import { GITPOD_HOST } from '../config';
 
 export const workspaces = {
     goTo: async (page: Page) => {
-        await page.goto(`https://${process.env.GITPOD_HOST}/workspaces`);
+        await page.goto(`https://${GITPOD_HOST}/workspaces`);
         await page.waitForSelector('button');
         await expect(page.getByRole('button', { name: 'New Workspace' })).toBeVisible();
     },
@@ -81,10 +82,10 @@ export const workspaces = {
 };
 
 export const newWorkspace = {
-    goTo: (page: Page, contextUrl = 'https://github.com/gitpod-io/empty') => page.goto(`https://${process.env.GITPOD_HOST}/new#${contextUrl}`),
+    goTo: (page: Page, contextUrl = 'https://github.com/gitpod-io/empty') => page.goto(`https://${GITPOD_HOST}/new#${contextUrl}`),
     continue: async (page: Page) => {
         await page.getByRole('button', { name: 'Continue' }).click();
-        await page.waitForURL(`https://${process.env.GITPOD_HOST}/start/**`);
+        await page.waitForURL(`https://${GITPOD_HOST}/start/**`);
     },
 };
 
@@ -164,7 +165,7 @@ export const workspaceTimeout = {
 };
 
 export const userPreferences = {
-    goTo: (page: Page) => page.goto(`https://${process.env.GITPOD_HOST}/user/preferences`),
+    goTo: (page: Page) => page.goto(`https://${GITPOD_HOST}/user/preferences`),
     resetOptions: async (page: Page) => {
         await page.getByRole('button', { name: 'Reset Options' }).click();
         await expect(page.getByText('Workspace options have been')).toBeVisible();
