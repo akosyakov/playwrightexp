@@ -113,6 +113,15 @@ export const editorDropDown = {
         }
         return expect(locator).toBeVisible();
     },
+    expectLatest: async (page: Page, latest: boolean) => {
+        let locator = editorDropDown.get(page);
+        if (latest) {
+            locator = locator.filter({ hasText: 'Latest' });
+        } else {
+            locator = locator.filter({ hasNotText: 'Latest' });
+        }
+        return expect(locator).toBeVisible();
+    },
     set: async (page: Page, editor: 'code' | 'xterm', latest = false) => {
         await editorDropDown.get(page).click();
         await page.locator('#' + editor + (latest ? '-latest' : '')).click();
@@ -131,6 +140,7 @@ export const latestEditor = {
         await latestEditor.get(page).click({
             force: true,
         });
+        await editorDropDown.expectLatest(page, value);
     },
 };
 
