@@ -1,78 +1,87 @@
 import { test } from '@playwright/test';
 
 import { userPreferences, newWorkspace, dotfiles, latestEditor, editorDropDown, workspaceTimeout, setup } from './pages';
+import { runWithContext } from './context';
 
 test.beforeEach(({ page }) => setup(page));
 
 test('dotfiles', async ({ page }) => {
-    await userPreferences.goTo(page);
-    await dotfiles.expect(page, '');
-    await dotfiles.set(page, 'https://github.com/akosyakov/gitpod-dotfiles');
+    await runWithContext({ page }, async () => {
+        await userPreferences.goTo();
+        await dotfiles.expect('');
+        await dotfiles.set('https://github.com/akosyakov/gitpod-dotfiles');
 
-    await userPreferences.goTo(page);
-    await dotfiles.expect(page, 'https://github.com/akosyakov/gitpod-dotfiles');
-    await dotfiles.set(page, '');
+        await userPreferences.goTo();
+        await dotfiles.expect('https://github.com/akosyakov/gitpod-dotfiles');
+        await dotfiles.set('');
 
-    await userPreferences.goTo(page);
-    await dotfiles.expect(page, '');
+        await userPreferences.goTo();
+        await dotfiles.expect('');
+    });
 });
 
 test('workspace timeout', async ({ page }) => {
-    await userPreferences.goTo(page);
-    await workspaceTimeout.expect(page, '');
-    await workspaceTimeout.set(page, '2h');
+    await runWithContext({ page }, async () => {
+        await userPreferences.goTo();
+        await workspaceTimeout.expect('');
+        await workspaceTimeout.set('2h');
 
-    await userPreferences.goTo(page);
-    await workspaceTimeout.expect(page, '2h');
-    await workspaceTimeout.set(page, '');
+        await userPreferences.goTo();
+        await workspaceTimeout.expect('2h');
+        await workspaceTimeout.set('');
 
-    await userPreferences.goTo(page);
-    await workspaceTimeout.expect(page, '');
+        await userPreferences.goTo();
+        await workspaceTimeout.expect('');
+    });
 });
 
 test('auto start options', async ({ page }) => {
-    // remember editor
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'code');
-    await editorDropDown.set(page, 'xterm');
-    await newWorkspace.continue(page);
+    await runWithContext({ page }, async () => {
+        // remember editor
+        await newWorkspace.goTo();
+        await editorDropDown.expect('code');
+        await editorDropDown.set('xterm');
+        await newWorkspace.continue();
 
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'xterm', false);
+        await newWorkspace.goTo();
+        await editorDropDown.expect('xterm', false);
 
-    // toggling latest editor
-    await userPreferences.goTo(page);
-    await latestEditor.set(page, true);
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'xterm', true);
+        // toggling latest editor
+        await userPreferences.goTo();
+        await latestEditor.set(true);
+        await newWorkspace.goTo();
+        await editorDropDown.expect('xterm', true);
 
-    await userPreferences.goTo(page);
-    await latestEditor.set(page, false);
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'xterm', false);
+        await userPreferences.goTo();
+        await latestEditor.set(false);
+        await newWorkspace.goTo();
+        await editorDropDown.expect('xterm', false);
 
-    // reset
-    await userPreferences.goTo(page);
-    await userPreferences.resetOptions(page);
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'code', false);
+        // reset
+        await userPreferences.goTo();
+        await userPreferences.resetOptions();
+        await newWorkspace.goTo();
+        await editorDropDown.expect('code', false);
+    });
 });
 
 test('editor', async ({ page }) => {
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'code');
+    await runWithContext({ page }, async () => {
+        await newWorkspace.goTo();
+        await editorDropDown.expect('code');
 
-    await userPreferences.goTo(page);
-    await editorDropDown.set(page, 'xterm');
-    await latestEditor.set(page, true);
+        await userPreferences.goTo();
+        await editorDropDown.set('xterm');
+        await latestEditor.set(true);
 
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'xterm', true);
+        await newWorkspace.goTo();
+        await editorDropDown.expect('xterm', true);
 
-    await userPreferences.goTo(page);
-    await editorDropDown.set(page, 'code', true);
-    await latestEditor.set(page, false);
+        await userPreferences.goTo();
+        await editorDropDown.set('code', true);
+        await latestEditor.set(false);
 
-    await newWorkspace.goTo(page);
-    await editorDropDown.expect(page, 'code');
+        await newWorkspace.goTo();
+        await editorDropDown.expect('code');
+    });
 });

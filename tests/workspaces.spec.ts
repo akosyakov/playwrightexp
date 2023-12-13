@@ -1,38 +1,43 @@
 import { test } from '@playwright/test';
 
 import { newWorkspace, workspaces, setup, workspaceClassDropDown } from './pages';
+import { runWithContext } from './context';
 
 test.beforeEach(({ page }) => setup(page));
 
 test('actions', async ({ page }) => {
-    await newWorkspace.goTo(page);
-    await newWorkspace.continue(page);
+    await runWithContext({ page }, async () => {
+        await newWorkspace.goTo();
+        await newWorkspace.continue();
 
-    await workspaces.goTo(page);
-    await workspaces.expectPinned(page, false);
-    await workspaces.expectShared(page, false);
+        await workspaces.goTo();
+        await workspaces.expectPinned(false);
+        await workspaces.expectShared(false);
 
-    await workspaces.setPinned(page, true);
-    await workspaces.setShared(page, true);
-    await workspaces.goTo(page);
-    await workspaces.expectPinned(page, true);
-    await workspaces.expectShared(page, true);
+        await workspaces.setPinned(true);
+        await workspaces.setShared(true);
+        await workspaces.goTo();
+        await workspaces.expectPinned(true);
+        await workspaces.expectShared(true);
 
-    await workspaces.setPinned(page, false);
-    await workspaces.setShared(page, false);
-    await workspaces.goTo(page);
-    await workspaces.expectPinned(page, false);
-    await workspaces.expectShared(page, false);
+        await workspaces.setPinned(false);
+        await workspaces.setShared(false);
+        await workspaces.goTo();
+        await workspaces.expectPinned(false);
+        await workspaces.expectShared(false);
 
-    await workspaces.rename(page, 'test');
-    await workspaces.rename(page, 'test2');
+        await workspaces.rename('test');
+        await workspaces.rename('test2');
 
-    await workspaces.expectRunning(page, true);
-    await workspaces.stop(page);
+        await workspaces.expectRunning(true);
+        await workspaces.stop();
+    });
 });
 
 test('workspace classes', async ({ page }) => {
-    await newWorkspace.goTo(page);
-    await workspaceClassDropDown.expect(page, 'g1-standard');
-    await workspaceClassDropDown.set(page, 'g1-small');
+    await runWithContext({ page }, async () => {
+        await newWorkspace.goTo();
+        await workspaceClassDropDown.expect('g1-standard');
+        await workspaceClassDropDown.set('g1-small');
+    });
 });
