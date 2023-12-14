@@ -9,17 +9,9 @@ Allow us to write e2e tests for dashboard components. Get more information from:
 
 - Clone this repo
 - Install packages and requirements of PlayWright (it will show missing parts when you run a test)
-- Generate session
-    - Create `.env` file in project root, with `GITPOD_HOST` and `GITPOD_AUTH_SESSION`
-        ```
-        # .env file
-        GITPOD_HOST=gitpod.io
-        GITPOD_AUTH_SESSION=.auth/io_session.json
-        ```
-    - Exec command
-        ```
-        yarn gen-session
-        ```
+- Generate session `yarn gen`
+
+> `yarn gen` will create `.env` file in project root, with `GITPOD_HOST` and `GITPOD_AUTH_SESSION`, you may need to update `.env` to use your preview env's value and exec `yarn gen` again
 
 Then we are happy with Test Explorer on VS Code UX or terminal `yarn test`
 

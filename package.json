@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "gen-session": "node scripts/session-gen.js",
+    "gen": "node scripts/session-gen.js",
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui"
   },
