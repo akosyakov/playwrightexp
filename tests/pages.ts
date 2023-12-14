@@ -109,13 +109,17 @@ export const newWorkspace = {
         }
         return page.goto(`https://${GITPOD_HOST}/new#${contextUrl}`);
     },
-    expect: async (options: Omit<CreateWorkspaceOptions, 'errorMsg'> & { continueEnabled: boolean }) => {
+    expect: async (options: CreateWorkspaceOptions & { continueEnabled: boolean }) => {
         const page = ctxPage();
         if (options.selectWorkspaceClass) {
             await workspaceClassDropDown.set(options.selectWorkspaceClass);
         }
         if (options.expectedDefaultWorkspaceClass) {
             await workspaceClassDropDown.expect(options.expectedDefaultWorkspaceClass);
+        }
+        if (options.errorMsg) {
+            await expect(page.getByText(options.errorMsg)).toBeVisible();
+            return;
         }
         await expect(page.getByRole('button', { name: 'Continue' })).toBeEnabled({ enabled: options.continueEnabled });
     },
