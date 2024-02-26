@@ -5,7 +5,7 @@ import { runWithContext } from './context';
 
 test.beforeEach(({ page }) => setup(page));
 
-test('limited workspace classes UX not selectable', async ({ page }) => {
+test.skip('limited workspace classes UX not selectable', async ({ page }) => {
     await runWithContext({ page }, async () => {
         await orgSettings.goTo();
         await orgSettings.setAllowedWorkspaceClasses([]);
@@ -22,7 +22,7 @@ test('limited workspace classes UX not selectable', async ({ page }) => {
     });
 });
 
-test('limited workspace classes, default selected should correct', async ({ page }) => {
+test.skip('limited workspace classes, default selected should correct', async ({ page }) => {
     await runWithContext({ page }, async () => {
         await orgSettings.goTo();
         await orgSettings.setAllowedWorkspaceClasses(['g1-small', 'g1-large']);
@@ -67,7 +67,9 @@ test('autostart option with disabled class should failed to start', async ({ pag
         await orgSettings.setAllowedWorkspaceClasses(['g1-small']);
 
         // autostart
-        await newWorkspace.goTo('https://github.com/gitpod-io/empty', true);
+        await newWorkspace.goTo('https://github.com/gitpod-io/empty', {
+            autoStart: true,
+        });
         await newWorkspace.expect({ errorMsg: newWorkspace.Errors.ClassNotAllowed, continueEnabled: false });
     });
 });

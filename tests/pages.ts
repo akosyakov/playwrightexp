@@ -3,7 +3,8 @@ import { GITPOD_HOST } from '../config';
 import { ctxPage, runWithContext } from './context';
 
 type WorkspaceClass = 'g1-small' | 'g1-standard' | 'g1-large';
-const AllWorkspaceClass: WorkspaceClass[] = ['g1-small', 'g1-standard', 'g1-large'];
+const AllWorkspaceClass: WorkspaceClass[] = ['g1-small', 'g1-standard'];
+// const AllWorkspaceClass: WorkspaceClass[] = ['g1-small', 'g1-standard', 'g1-large'];
 
 export const workspaces = {
     goTo: async () => {
@@ -98,16 +99,38 @@ export const workspaces = {
 interface CreateWorkspaceOptions {
     expectedDefaultWorkspaceClass?: WorkspaceClass;
     selectWorkspaceClass?: WorkspaceClass;
+
+    expectedDefaultEditor?: 'code' | 'xterm';
+    selectEditor?: 'code' | 'xterm';
     errorMsg?: string;
 }
 
+interface StartOptions {
+    editor?: 'code' | 'xterm';
+    workspaceClass?: WorkspaceClass;
+    autoStart?: true;
+}
+
 export const newWorkspace = {
-    goTo: (contextUrl = 'https://github.com/gitpod-io/empty', autoStart?: true) => {
+    goTo: (contextUrl = 'https://github.com/gitpod-io/empty', startOptions?: StartOptions) => {
         const page = ctxPage();
-        if (autoStart) {
-            return page.goto(`https://${GITPOD_HOST}/new?autostart=true#${contextUrl}`);
+        const url = new URL(`https://${GITPOD_HOST}/new`);
+        url.hash = contextUrl;
+        if (!startOptions) {
+            return page.goto(url.toString());
         }
-        return page.goto(`https://${GITPOD_HOST}/new#${contextUrl}`);
+        const searchParams = new URLSearchParams();
+        if (startOptions.workspaceClass) {
+            searchParams.set('workspaceClass', startOptions.workspaceClass);
+        }
+        if (startOptions.editor) {
+            searchParams.set('editor', startOptions.editor);
+        }
+        if (startOptions.autoStart) {
+            searchParams.set('autostart', 'true');
+        }
+        url.search = searchParams.toString();
+        return page.goto(url.toString());
     },
     expect: async (options: CreateWorkspaceOptions & { continueEnabled: boolean }) => {
         const page = ctxPage();
@@ -116,6 +139,12 @@ export const newWorkspace = {
         }
         if (options.expectedDefaultWorkspaceClass) {
             await workspaceClassDropDown.expect(options.expectedDefaultWorkspaceClass);
+        }
+        if (options.selectEditor) {
+            await editorDropDown.set(options.selectEditor);
+        }
+        if (options.expectedDefaultEditor) {
+            await editorDropDown.expect(options.expectedDefaultEditor, false);
         }
         if (options.errorMsg) {
             await expect(page.getByText(options.errorMsg)).toBeVisible();
@@ -309,22 +338,37 @@ export const workspaceTimeout = {
 export const userPreferences = {
     goTo: () => ctxPage().goto(`https://${GITPOD_HOST}/user/preferences`),
     resetOptions: async () => {
+        await expect(ctxPage().getByRole('button', { name: 'Reset Options' })).toBeVisible({
+            timeout: 10000,
+        });
         await ctxPage().getByRole('button', { name: 'Reset Options' }).click();
         await expect(ctxPage().getByText('Workspace options have been')).toBeVisible();
     },
 };
 
-export const setup = async (page: Page) => {
+interface setupCleanOptions {
+    userPreferences?: boolean;
+    workspaces?: boolean;
+    orgSettings?: boolean;
+}
+export const setup = async (page: Page, options?: setupCleanOptions) => {
     await runWithContext({ page }, async () => {
-        await userPreferences.goTo();
-        await userPreferences.resetOptions();
-        await latestEditor.set(false);
-        await editorDropDown.set('code');
-        await dotfiles.set('');
-        await workspaceTimeout.set('');
-        await workspaces.goTo();
-        await workspaces.deleteAll();
-        await orgSettings.goTo();
-        await orgSettings.setAllowedWorkspaceClasses(AllWorkspaceClass);
+        const opts = Object.assign({}, options, { userPreferences: true, workspaces: true, orgSettings: true });
+        if (opts.userPreferences) {
+            await userPreferences.goTo();
+            await userPreferences.resetOptions();
+            await latestEditor.set(false);
+            await editorDropDown.set('code');
+            await dotfiles.set('');
+            await workspaceTimeout.set('');
+        }
+        if (opts.workspaces) {
+            await workspaces.goTo();
+            await workspaces.deleteAll();
+        }
+        if (opts.orgSettings) {
+            await orgSettings.goTo();
+            await orgSettings.setAllowedWorkspaceClasses(AllWorkspaceClass);
+        }
     });
 };
