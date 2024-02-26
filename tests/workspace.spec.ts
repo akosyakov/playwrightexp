@@ -9,7 +9,7 @@ test.beforeEach(({ page }) =>
     }),
 );
 
-test('workspace start options', async ({ page }) => {
+test('workspace start options ordering', async ({ page }) => {
     test.setTimeout(120000);
 
     await runWithContext({ page }, async () => {
@@ -33,6 +33,7 @@ test('workspace start options', async ({ page }) => {
         await workspaces.goTo();
         await workspaces.expectRunning(true);
         await workspaces.stop();
+        await workspaces.deleteAll();
 
         // go back to start page, it should use the last settings
         await newWorkspace.goTo('https://github.com/gitpod-io/empty');
@@ -70,17 +71,17 @@ test('workspace start options', async ({ page }) => {
             continueEnabled: true,
         });
 
-        await newWorkspace.goTo('https://github.com/gitpod-io/empty', { workspaceClass: 'g1-small' });
+        await newWorkspace.goTo('https://github.com/gitpod-io/empty', { workspaceClass: 'g1-standard' });
         await newWorkspace.expect({
-            expectedDefaultWorkspaceClass: 'g1-small',
+            expectedDefaultWorkspaceClass: 'g1-standard',
             expectedDefaultEditor: 'xterm',
             continueEnabled: true,
         });
 
-        await newWorkspace.goTo('https://github.com/gitpod-io/empty', { editor: 'xterm' });
+        await newWorkspace.goTo('https://github.com/gitpod-io/empty', { editor: 'code' });
         await newWorkspace.expect({
             expectedDefaultWorkspaceClass: 'g1-small',
-            expectedDefaultEditor: 'xterm',
+            expectedDefaultEditor: 'code',
             continueEnabled: true,
         });
 
@@ -88,6 +89,26 @@ test('workspace start options', async ({ page }) => {
         await newWorkspace.goTo('https://github.com/gitpod-io/empty');
         await newWorkspace.expect({
             expectedDefaultWorkspaceClass: 'g1-small',
+            expectedDefaultEditor: 'xterm',
+            continueEnabled: true,
+        });
+
+        // with auto start option
+        await newWorkspace.goTo('https://github.com/gitpod-io/empty', { workspaceClass: 'g1-standard', autoStart: true });
+        await newWorkspace.expect({
+            expectedDefaultWorkspaceClass: 'g1-standard',
+            expectedDefaultEditor: 'xterm',
+            continueEnabled: true,
+        });
+        await newWorkspace.continue();
+        await workspaces.goTo();
+        await workspaces.expectRunning(true);
+        await workspaces.stop();
+        await workspaces.deleteAll();
+
+        await newWorkspace.goTo('https://github.com/gitpod-io/empty');
+        await newWorkspace.expect({
+            expectedDefaultWorkspaceClass: 'g1-standard',
             expectedDefaultEditor: 'xterm',
             continueEnabled: true,
         });
